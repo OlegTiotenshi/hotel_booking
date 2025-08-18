@@ -6,6 +6,7 @@ from src.database import async_session_maker
 from src.api.dependencies import PaginationDep
 from src.schemas.hotels import Hotel, HotelPATCH
 from src.models.hotels import HotelsOrm
+from src.repositories.hotels import HotelsRepository
 
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -20,17 +21,19 @@ async def get_hotels(
     per_page = pagination.per_page or 5
 
     async with async_session_maker() as session:
-        query = select(HotelsOrm)
-        if location:
-            query = query.filter(HotelsOrm.location.ilike(f"%{location}%"))
-        if title:
-            query = query.filter(HotelsOrm.title.ilike(f"%{title}%"))
-        query = query.limit(per_page).offset((pagination.page - 1) * per_page)
+        return await HotelsRepository(session).get_all()
 
-        result = await session.execute(query)
+        # query = select(HotelsOrm)
+        # if location:
+        #     query = query.filter(HotelsOrm.location.icontains(location))
+        # if title:
+        #     query = query.filter(HotelsOrm.title.icontains(title))
+        # query = query.limit(per_page).offset((pagination.page - 1) * per_page)
 
-        hotels = result.scalars().all()
-        return hotels
+        # result = await session.execute(query)
+
+        # hotels = result.scalars().all()
+        # return hotels
 
 
 @router.post("")
