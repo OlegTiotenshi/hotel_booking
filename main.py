@@ -46,39 +46,35 @@ def create_hotel(
 
 
 @app.put("/hotels/{hotel_id}")
-def update_hotel(
+def edit_hotel(
     hotel_id: int,
-    title: str = Body(embed=True),
-    name: str = Body(embed=True),
+    title: str = Body(),
+    name: str = Body(),
 ):
-    if not title or not name:
-        return {"status": "Fields cannot be empty"}
-
-    for i, hotel in enumerate(hotels):
-        if hotel["id"] == hotel_id:
-            hotels[i]["title"] = title
-            hotels[i]["name"] = name
-            return {"status": "OK", "hotel": hotels[i]}
-    return {"status": "Not found"}
+    global hotels
+    hotel = [hotel for hotel in hotels if hotel["id"] == hotel_id][0]
+    hotel["title"] = title
+    hotel["name"] = name
+    return {"status": "OK"}
 
 
-@app.patch("/hotels/{hotel_id}")
-def partial_update_hotel(
+@app.patch(
+    "/hotels/{hotel_id}",
+    summary="Частичное обновление данных об отеле",
+    description="<h1>Тут мы частично обновляем данные об отеле: можно отправить name, а можно title</h1>",
+)
+def partially_edit_hotel(
     hotel_id: int,
-    title: str | None = Body(None, embed=True),
-    name: str | None = Body(None, embed=True),
+    title: str | None = Body(None),
+    name: str | None = Body(None),
 ):
-    if title == "" or name == "":
-        return {"status": "Fields cannot be empty"}
-
-    for i, hotel in enumerate(hotels):
-        if hotel["id"] == hotel_id:
-            if title:
-                hotels[i]["title"] = title
-            if name:
-                hotels[i]["name"] = name
-            return {"status": "OK", "hotel": hotels[i]}
-    return {"status": "Not found"}
+    global hotels
+    hotel = [hotel for hotel in hotels if hotel["id"] == hotel_id][0]
+    if title:
+        hotel["title"] = title
+    if name:
+        hotel["name"] = name
+    return {"status": "OK"}
 
 
 @app.delete("/hotels/{hotel_id}")
