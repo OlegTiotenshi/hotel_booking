@@ -1,8 +1,8 @@
-"""rooms added migration
+"""add rooms
 
-Revision ID: 84f61ca160fb
+Revision ID: 3f113feb6f75
 Revises: 11b555c680b3
-Create Date: 2025-08-18 20:21:33.191843
+Create Date: 2025-08-18 20:32:31.327268
 
 """
 
@@ -12,7 +12,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = "84f61ca160fb"
+revision: str = "3f113feb6f75"
 down_revision: Union[str, Sequence[str], None] = "11b555c680b3"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
