@@ -7,5 +7,5 @@ class Hotel(BaseModel):
 
 
 class HotelPATCH(BaseModel):
-    title: str | None = (Field(None),)
-    name: str | None = (Field(None),)
+    title: str | None = Field(None)
+    name: str | None = Field(None)
