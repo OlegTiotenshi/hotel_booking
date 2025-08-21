@@ -32,7 +32,7 @@ async def login_user(
     response: Response,
     db: DBDep,
 ):
-    user = db.users.get_user_with_hashed_password(email=data.email)
+    user = await db.users.get_user_with_hashed_password(email=data.email)
     if not user:
         raise HTTPException(
             status_code=401,

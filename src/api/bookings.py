@@ -13,7 +13,7 @@ async def create_booking(
     db: DBDep,
     booking_data: BookingAddRequest = Body(),
 ):
-    room = await db.rooms.get_one_or_none(booking_data.room_id)
+    room = await db.rooms.get_one_or_none(id=booking_data.room_id)
     if not room:
         return {"status": "OK", "data": "Room not found"}
 
@@ -26,3 +26,18 @@ async def create_booking(
     await db.commit()
 
     return {"status": "OK", "data": booking}
+
+
+@router.get("")
+async def get_bookings(
+    db: DBDep,
+):
+    return await db.bookings.get_all()
+
+
+@router.get("/me")
+async def get_my_bookings(
+    db: DBDep,
+    user_id: UserIdDep,
+):
+    return await db.bookings.get_all_filtered(user_id=user_id)

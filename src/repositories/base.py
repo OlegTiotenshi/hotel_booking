@@ -18,7 +18,7 @@ class BaseRepository:
         ]
 
     async def get_all(self):
-        return await self.get_filtered()
+        return await self.get_all_filtered()
 
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
