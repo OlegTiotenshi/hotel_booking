@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body
 
 from src.schemas.bookings import BookingAdd, BookingAddRequest
-from src.api.dependencies import DBDep
+from src.api.dependencies import DBDep, UserIdDep
 
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
@@ -9,6 +9,7 @@ router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 @router.post("")
 async def create_booking(
+    user_id: UserIdDep,
     db: DBDep,
     booking_data: BookingAddRequest = Body(),
 ):
@@ -16,7 +17,11 @@ async def create_booking(
     if not room:
         return {"status": "OK", "data": "Room not found"}
 
-    _booking_data = BookingAdd(price=room.price, **booking_data.model_dump())
+    _booking_data = BookingAdd(
+        user_id=user_id,
+        price=room.price,
+        **booking_data.model_dump(),
+    )
     booking = await db.bookings.add(_booking_data)
     await db.commit()
 
