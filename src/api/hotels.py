@@ -1,7 +1,7 @@
 from fastapi import Query, APIRouter, Body
 
 from src.database import async_session_maker
-from src.api.dependencies import PaginationDep
+from src.api.dependencies import DBDep, PaginationDep
 from src.schemas.hotels import HotelAdd, HotelPatch
 from src.repositories.hotels import HotelsRepository
 
@@ -12,18 +12,18 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 @router.get("")
 async def get_hotels(
     pagination: PaginationDep,
+    db: DBDep,
     location: str | None = Query(None),
     title: str | None = Query(None),
 ):
     per_page = pagination.per_page or 5
 
-    async with async_session_maker() as session:
-        return await HotelsRepository(session).get_all(
-            location=location,
-            title=title,
-            limit=per_page,
-            offset=(pagination.page - 1) * per_page,
-        )
+    return await db.hotels.get_all(
+        location=location,
+        title=title,
+        limit=per_page,
+        offset=(pagination.page - 1) * per_page,
+    )
 
 
 @router.get("/{hotel_id}")
