@@ -1,7 +1,7 @@
-from fastapi import Query, APIRouter, Body
+from fastapi import APIRouter, Body
 
 from src.database import async_session_maker
-from src.schemas.rooms import RoomAdd, RoomPATCH
+from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatch, RoomPatchRequest
 from src.repositories.rooms import RoomsRepository
 
 
@@ -9,16 +9,9 @@ router = APIRouter(prefix="/hotels", tags=["Номера"])
 
 
 @router.get("/{hotel_id}/rooms")
-async def get_rooms(
-    hotel_id: int,
-    title: str | None = Query(None),
-):
+async def get_rooms(hotel_id: int):
     async with async_session_maker() as session:
-        rooms = await RoomsRepository(session).get_all(hotel_id=hotel_id)
-        if title:
-            rooms = [room for room in rooms if title.lower() in room.title.lower()]
-
-        return rooms
+        return await RoomsRepository(session).get_all_filtered(hotel_id=hotel_id)
 
 
 @router.get("/{hotel_id}/rooms/{room_id}")
@@ -36,7 +29,7 @@ async def get_room(
 @router.post("/{hotel_id}/rooms")
 async def create_room(
     hotel_id: int,
-    room_data: RoomAdd = Body(
+    room_data: RoomAddRequest = Body(
         openapi_examples={
             "1": {
                 "summary": "Стандартный номер",
@@ -45,7 +38,6 @@ async def create_room(
                     "description": "Уютный номер с двумя односпальными кроватями, телевизором и кондиционером",
                     "price": 5000,
                     "quantity": 15,
-                    "hotel_id": 2,
                 },
             },
             "2": {
@@ -55,17 +47,14 @@ async def create_room(
                     "description": "Просторный номер с королевской кроватью, мини-баром и панорамным видом на море",
                     "price": 12000,
                     "quantity": 8,
-                    "hotel_id": 3,
                 },
             },
         }
     ),
 ):
-    if room_data.hotel_id != hotel_id:
-        return {"status": "ERROR", "message": "hotel_id in path and body must match"}
-
+    _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     async with async_session_maker() as session:
-        room = await RoomsRepository(session).add(room_data)
+        room = await RoomsRepository(session).add(_room_data)
         await session.commit()
 
     return {"status": "OK", "data": room}
@@ -75,21 +64,12 @@ async def create_room(
 async def edit_room(
     hotel_id: int,
     room_id: int,
-    room_data: RoomAdd,
+    room_data: RoomAddRequest,
 ):
+    _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     async with async_session_maker() as session:
-        existing_room = await RoomsRepository(session).get_one_or_none(
-            id=room_id,
-            hotel_id=hotel_id,
-        )
-        if not existing_room:
-            return {
-                "status": "ERROR",
-                "message": "Room not found in this hotel",
-            }
-
         await RoomsRepository(session).edit(
-            room_data,
+            _room_data,
             id=room_id,
             hotel_id=hotel_id,
         )
@@ -101,21 +81,14 @@ async def edit_room(
 async def partially_edit_room(
     hotel_id: int,
     room_id: int,
-    room_data: RoomPATCH,
+    room_data: RoomPatchRequest,
 ):
+    _room_data = RoomPatch(
+        hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True)
+    )
     async with async_session_maker() as session:
-        existing_room = await RoomsRepository(session).get_one_or_none(
-            id=room_id,
-            hotel_id=hotel_id,
-        )
-        if not existing_room:
-            return {
-                "status": "ERROR",
-                "message": "Room not found in this hotel",
-            }
-
         await RoomsRepository(session).edit(
-            room_data,
+            _room_data,
             partially_update=True,
             id=room_id,
             hotel_id=hotel_id,
@@ -129,18 +102,7 @@ async def delete_room(
     hotel_id: int,
     room_id: int,
 ):
-
     async with async_session_maker() as session:
-        existing_room = await RoomsRepository(session).get_one_or_none(
-            id=room_id,
-            hotel_id=hotel_id,
-        )
-        if not existing_room:
-            return {
-                "status": "ERROR",
-                "message": "Room not found in this hotel",
-            }
-
         await RoomsRepository(session).delete(
             id=room_id,
             hotel_id=hotel_id,

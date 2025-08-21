@@ -2,7 +2,7 @@ from fastapi import Query, APIRouter, Body
 
 from src.database import async_session_maker
 from src.api.dependencies import PaginationDep
-from src.schemas.hotels import HotelAdd, HotelPATCH
+from src.schemas.hotels import HotelAdd, HotelPatch
 from src.repositories.hotels import HotelsRepository
 
 
@@ -78,7 +78,7 @@ async def edit_hotel(hotel_id: int, hotel_data: HotelAdd):
 )
 async def partially_edit_hotel(
     hotel_id: int,
-    hotel_data: HotelPATCH,
+    hotel_data: HotelPatch,
 ):
     async with async_session_maker() as session:
         await HotelsRepository(session).edit(
