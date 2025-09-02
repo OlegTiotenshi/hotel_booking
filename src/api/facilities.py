@@ -16,7 +16,7 @@ async def create_facilities(
     db: DBDep,
     facility_data: FacilityAdd = Body(),
 ):
-    hotel = await db.facilities.add(facility_data)
+    facility = await db.facilities.add(facility_data)
     await db.commit()
 
-    return {"status": "OK", "data": hotel}
+    return {"status": "OK", "data": facility}
