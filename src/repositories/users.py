@@ -15,4 +15,4 @@ class UsersRepository(BaseRepository):
         query = select(self.model).filter_by(email=email)
         result = await self.session.execute(query)
         model = result.scalars().one()
-        return UserWithHashedPassword.model_validate(model)
+        return UserWithHashedPassword.model_validate(model, from_attributes=True)
