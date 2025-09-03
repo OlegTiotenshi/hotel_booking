@@ -69,6 +69,8 @@ async def edit_room(
         id=room_id,
         hotel_id=hotel_id,
     )
+    await update_room_facilities(db, room_id, room_data.facilities_ids)
+
     await db.commit()
     return {"status": "OK"}
 
@@ -89,6 +91,8 @@ async def partially_edit_room(
         id=room_id,
         hotel_id=hotel_id,
     )
+    if room_data.facilities_ids is not None:
+        await update_room_facilities(db, room_id, room_data.facilities_ids)
     await db.commit()
     return {"status": "OK"}
 
@@ -105,3 +109,31 @@ async def delete_room(
     )
     await db.commit()
     return {"status": "OK"}
+
+
+async def update_room_facilities(
+    db: DBDep,
+    room_id: int,
+    new_facility_ids: list[int],
+):
+    current_facilities = await db.rooms_facilities.get_all_filtered(room_id=room_id)
+    current_facility_ids = {fac.facility_id for fac in current_facilities}
+    new_facility_ids_set = set(new_facility_ids)
+
+    facilities_to_add = new_facility_ids_set - current_facility_ids
+    facilities_to_remove = current_facility_ids - new_facility_ids_set
+
+    if facilities_to_remove:
+        facilities_to_remove_ids = [
+            fac.id
+            for fac in current_facilities
+            if fac.facility_id in facilities_to_remove
+        ]
+        await db.rooms_facilities.delete_bulk(facilities_to_remove_ids)
+
+    if facilities_to_add:
+        rooms_facilities_data = [
+            RoomFacilityAdd(room_id=room_id, facility_id=f_id)
+            for f_id in facilities_to_add
+        ]
+        await db.rooms_facilities.add_bulk(rooms_facilities_data)
