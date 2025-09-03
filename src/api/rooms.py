@@ -32,7 +32,7 @@ async def get_room(
 ):
     return await db.rooms.get_room_or_none(
         hotel_id=hotel_id,
-        room_id=room_id,
+        id=room_id,
     )
 
 

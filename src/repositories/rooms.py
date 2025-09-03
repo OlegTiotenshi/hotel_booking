@@ -33,14 +33,11 @@ class RoomsRepository(BaseRepository):
             RoomWithRels.model_validate(model, from_attributes=True) for model in rooms
         ]
 
-    async def get_room_or_none(self, hotel_id, room_id):
+    async def get_room_or_none(self, **filter_by):
         query = (
             select(self.model)
             .options(selectinload(self.model.facilities))
-            .filter_by(
-                hotel_id=hotel_id,
-                id=room_id,
-            )
+            .filter_by(**filter_by)
         )
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
