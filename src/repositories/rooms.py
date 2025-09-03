@@ -1,7 +1,7 @@
 from datetime import date
 
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import selectinload
 
 from src.repositories.base import BaseRepository
 from src.models.rooms import RoomsOrm
@@ -27,7 +27,23 @@ class RoomsRepository(BaseRepository):
             .filter(RoomsOrm.id.in_(rooms_ids_to_get))
         )
         result = await self.session.execute(query)
+        rooms = result.unique().scalars().all()
+
         return [
-            RoomWithRels.model_validate(model)
-            for model in result.unique().scalars().all()
+            RoomWithRels.model_validate(model, from_attributes=True) for model in rooms
         ]
+
+    async def get_room_or_none(self, hotel_id, room_id):
+        query = (
+            select(self.model)
+            .options(selectinload(self.model.facilities))
+            .filter_by(
+                hotel_id=hotel_id,
+                id=room_id,
+            )
+        )
+        result = await self.session.execute(query)
+        model = result.scalars().one_or_none()
+        if model is None:
+            return None
+        return RoomWithRels.model_validate(model, from_attributes=True)
