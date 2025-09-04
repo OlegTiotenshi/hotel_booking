@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import HTMLResponse
 import uvicorn
 
 import sys
@@ -12,7 +15,6 @@ from src.api.hotels import router as router_hotels
 from src.api.rooms import router as router_rooms
 from src.api.bookings import router as router_bookings
 from src.api.facilities import router as router_facilities
-
 
 app = FastAPI(docs_url=None)
 app.include_router(router_auth)
@@ -31,6 +33,20 @@ async def custom_swagger_ui_html():
         swagger_js_url="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js",
         swagger_css_url="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css",
     )
+
+
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return """
+    <a href="http://127.0.0.1:8000/docs">Documentation</a><br>
+    <a href="http://127.0.0.1:8000/redoc">ReDoc</a><br>
+    <a href="http://127.0.0.1:8000/health">Health Check</a>
+    """
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "timestamp": datetime.now()}
 
 
 if __name__ == "__main__":
