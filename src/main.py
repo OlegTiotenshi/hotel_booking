@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from datetime import datetime
 
 from fastapi import FastAPI
@@ -15,8 +16,19 @@ from src.api.hotels import router as router_hotels
 from src.api.rooms import router as router_rooms
 from src.api.bookings import router as router_bookings
 from src.api.facilities import router as router_facilities
+from src.init import redis_manager
 
-app = FastAPI(docs_url=None)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # При старте приложения
+    await redis_manager.connect()
+    yield
+    await redis_manager.close()
+    # При выключении/перезагрузке приложения
+
+
+app = FastAPI(docs_url=None, lifespan=lifespan)
 app.include_router(router_auth)
 app.include_router(router_hotels)
 app.include_router(router_rooms)
