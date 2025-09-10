@@ -10,8 +10,8 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 
 @router.post("/register")
 async def register_user(
-        data: UserRequestAdd,
-        db: DBDep,
+    data: UserRequestAdd,
+    db: DBDep,
 ):
     try:
         hashed_password = AuthService().hash_password(data.password)
@@ -27,9 +27,9 @@ async def register_user(
 
 @router.post("/login")
 async def login_user(
-        data: UserRequestAdd,
-        response: Response,
-        db: DBDep,
+    data: UserRequestAdd,
+    response: Response,
+    db: DBDep,
 ):
     user = await db.users.get_user_with_hashed_password(email=data.email)
     if not user:
@@ -55,8 +55,8 @@ async def logout_user(response: Response):
 
 @router.get("/me")
 async def get_me(
-        user_id: UserIdDep,
-        db: DBDep,
+    user_id: UserIdDep,
+    db: DBDep,
 ):
     user = await db.users.get_one_or_none(id=user_id)
     return user

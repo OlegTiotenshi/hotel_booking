@@ -33,9 +33,7 @@ class RoomsRepository(BaseRepository):
 
     async def get_room_or_none(self, **filter_by):
         query = (
-            select(self.model)
-            .options(selectinload(self.model.facilities))
-            .filter_by(**filter_by)
+            select(self.model).options(selectinload(self.model.facilities)).filter_by(**filter_by)
         )
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()

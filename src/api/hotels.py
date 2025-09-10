@@ -12,12 +12,12 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 @router.get("")
 @cache(expire=10)
 async def get_hotels(
-        pagination: PaginationDep,
-        db: DBDep,
-        location: str | None = Query(None),
-        title: str | None = Query(None),
-        date_from: date = Query(example="2024-08-01"),
-        date_to: date = Query(example="2024-08-10"),
+    pagination: PaginationDep,
+    db: DBDep,
+    location: str | None = Query(None),
+    title: str | None = Query(None),
+    date_from: date = Query(example="2024-08-01"),
+    date_to: date = Query(example="2024-08-10"),
 ):
     per_page = pagination.per_page or 5
 
@@ -33,33 +33,33 @@ async def get_hotels(
 
 @router.get("/{hotel_id}")
 async def get_hotel(
-        hotel_id: int,
-        db: DBDep,
+    hotel_id: int,
+    db: DBDep,
 ):
     return await db.hotels.get_one_or_none(id=hotel_id)
 
 
 @router.post("")
 async def create_hotel(
-        db: DBDep,
-        hotel_data: HotelAdd = Body(
-            openapi_examples={
-                "1": {
-                    "summary": "Сочи",
-                    "value": {
-                        "title": "Отель RICH 5 звезд у моря",
-                        "location": "Сочи, ул. Моря, 1",
-                    },
+    db: DBDep,
+    hotel_data: HotelAdd = Body(
+        openapi_examples={
+            "1": {
+                "summary": "Сочи",
+                "value": {
+                    "title": "Отель RICH 5 звезд у моря",
+                    "location": "Сочи, ул. Моря, 1",
                 },
-                "2": {
-                    "summary": "Дубай",
-                    "value": {
-                        "title": "Отель SHARM все включено",
-                        "location": "Дубай, ул. Шейха, 2",
-                    },
+            },
+            "2": {
+                "summary": "Дубай",
+                "value": {
+                    "title": "Отель SHARM все включено",
+                    "location": "Дубай, ул. Шейха, 2",
                 },
-            }
-        ),
+            },
+        }
+    ),
 ):
     hotel = await db.hotels.add(hotel_data)
     await db.commit()
@@ -69,9 +69,9 @@ async def create_hotel(
 
 @router.put("/{hotel_id}")
 async def edit_hotel(
-        hotel_id: int,
-        hotel_data: HotelAdd,
-        db: DBDep,
+    hotel_id: int,
+    hotel_data: HotelAdd,
+    db: DBDep,
 ):
     await db.hotels.edit(
         hotel_data,
@@ -83,9 +83,9 @@ async def edit_hotel(
 
 @router.patch("/{hotel_id}")
 async def partially_edit_hotel(
-        hotel_id: int,
-        hotel_data: HotelPatch,
-        db: DBDep,
+    hotel_id: int,
+    hotel_data: HotelPatch,
+    db: DBDep,
 ):
     await db.hotels.edit(
         hotel_data,
@@ -98,8 +98,8 @@ async def partially_edit_hotel(
 
 @router.delete("/{hotel_id}")
 async def delete_hotel(
-        hotel_id: int,
-        db: DBDep,
+    hotel_id: int,
+    db: DBDep,
 ):
     await db.hotels.delete(id=hotel_id)
     await db.commit()
