@@ -1,5 +1,18 @@
 import json
+from unittest import mock
 import pytest
+from unittest.mock import patch, MagicMock
+
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
+
+
+@pytest.fixture(autouse=True)
+def mock_celery_tasks():
+    with patch('src.api.facilities.test_task.delay') as mock_delay:
+        mock_delay.return_value = MagicMock()
+        yield
+
+
 from httpx import AsyncClient, ASGITransport
 
 from src.api.dependencies import get_db
