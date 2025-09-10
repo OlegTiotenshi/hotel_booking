@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response
 from sqlalchemy.exc import IntegrityError
 
-
 from src.api.dependencies import UserIdDep, DBDep
 from src.services.auth import AuthService
 from src.schemas.users import UserRequestAdd, UserAdd
@@ -11,26 +10,26 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 
 @router.post("/register")
 async def register_user(
-    data: UserRequestAdd,
-    db: DBDep,
+        data: UserRequestAdd,
+        db: DBDep,
 ):
-    hashed_password = AuthService().hash_password(data.password)
-    new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
     try:
+        hashed_password = AuthService().hash_password(data.password)
+        new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
         await db.users.add(new_user_data)
         await db.commit()
-        return {"status": "OK"}
     except IntegrityError as e:
         if "unique" in str(e).lower() and "email" in str(e).lower():
-            return {"status": "User with this email already exists"}
-        return None
+            raise HTTPException(status_code=400, detail="User with this email already exists")
+
+    return {"status": "OK"}
 
 
 @router.post("/login")
 async def login_user(
-    data: UserRequestAdd,
-    response: Response,
-    db: DBDep,
+        data: UserRequestAdd,
+        response: Response,
+        db: DBDep,
 ):
     user = await db.users.get_user_with_hashed_password(email=data.email)
     if not user:
@@ -56,8 +55,8 @@ async def logout_user(response: Response):
 
 @router.get("/me")
 async def get_me(
-    user_id: UserIdDep,
-    db: DBDep,
+        user_id: UserIdDep,
+        db: DBDep,
 ):
     user = await db.users.get_one_or_none(id=user_id)
     return user
