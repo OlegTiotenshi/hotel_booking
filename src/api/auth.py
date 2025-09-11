@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response
-from sqlalchemy.exc import IntegrityError
 
 from src.api.dependencies import UserIdDep, DBDep
+from src.exceptions import ObjectAlreadyExistsException
 from src.services.auth import AuthService
 from src.schemas.users import UserRequestAdd, UserAdd
 
@@ -13,14 +13,13 @@ async def register_user(
     data: UserRequestAdd,
     db: DBDep,
 ):
+    hashed_password = AuthService().hash_password(data.password)
+    new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
     try:
-        hashed_password = AuthService().hash_password(data.password)
-        new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
         await db.users.add(new_user_data)
         await db.commit()
-    except IntegrityError as e:
-        if "unique" in str(e).lower() and "email" in str(e).lower():
-            raise HTTPException(status_code=400, detail="User with this email already exists")
+    except ObjectAlreadyExistsException:
+        raise HTTPException(status_code=409, detail="Пользователь с такой почтой уже существует")
 
     return {"status": "OK"}
 
