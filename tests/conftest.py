@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 import json
 from unittest import mock
 import pytest
@@ -8,7 +9,7 @@ mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f)
 
 @pytest.fixture(autouse=True)
 def mock_celery_tasks():
-    with patch('src.api.facilities.test_task.delay') as mock_delay:
+    with patch("src.services.facilities.test_task.delay") as mock_delay:
         mock_delay.return_value = MagicMock()
         yield
 
@@ -19,7 +20,7 @@ from src.api.dependencies import get_db
 from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
 from src.main import app
-from src.models import *
+from src.models import *  # noqa
 
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
@@ -67,29 +68,19 @@ async def setup_database(check_test_mode):
 
 @pytest.fixture(scope="session")
 async def ac() -> AsyncClient:
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
         yield ac
 
 
 @pytest.fixture(scope="session", autouse=True)
 async def register_user(ac, setup_database):
-    await ac.post(
-        "/auth/register",
-        json={
-            "email": "kot@pes.com",
-            "password": "1234"
-        }
-    )
+    await ac.post("/auth/register", json={"email": "kot@pes.com", "password": "1234"})
 
 
 @pytest.fixture(scope="session")
 async def authenticated_ac(register_user, ac):
-    await ac.post(
-        "/auth/login",
-        json={
-            "email": "kot@pes.com",
-            "password": "1234"
-        }
-    )
+    await ac.post("/auth/login", json={"email": "kot@pes.com", "password": "1234"})
     assert ac.cookies["access_token"]
     yield ac

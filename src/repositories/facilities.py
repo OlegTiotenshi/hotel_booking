@@ -2,7 +2,6 @@ from sqlalchemy import select, delete, insert
 
 from src.repositories.base import BaseRepository
 from src.models.facilities import FacilitiesOrm, RoomsFacilitiesOrm
-from src.schemas.facilities import RoomFacility
 from src.repositories.mappers.mappers import FacilityDataMapper, RoomFacilityDataMapper
 
 
@@ -20,9 +19,7 @@ class RoomsFacilitiesRepository(BaseRepository):
         room_id: int,
         facilities_ids: list[int],
     ) -> None:
-        get_current_facilities_query = select(self.model.facility_id).filter_by(
-            room_id=room_id
-        )
+        get_current_facilities_query = select(self.model.facility_id).filter_by(room_id=room_id)
         res = await self.session.execute(get_current_facilities_query)
         current_facilities_ids: list[int] = res.scalars().all()
 
@@ -41,9 +38,6 @@ class RoomsFacilitiesRepository(BaseRepository):
 
         if facilities_to_add:
             insert_m2m_facilities_stmt = insert(self.model).values(
-                [
-                    {"room_id": room_id, "facility_id": f_id}
-                    for f_id in facilities_to_add
-                ],
+                [{"room_id": room_id, "facility_id": f_id} for f_id in facilities_to_add],
             )
             await self.session.execute(insert_m2m_facilities_stmt)
