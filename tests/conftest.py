@@ -9,7 +9,7 @@ mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f)
 
 @pytest.fixture(autouse=True)
 def mock_celery_tasks():
-    with patch("src.api.facilities.test_task.delay") as mock_delay:
+    with patch("src.services.facilities.test_task.delay") as mock_delay:
         mock_delay.return_value = MagicMock()
         yield
 
