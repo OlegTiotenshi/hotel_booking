@@ -14,22 +14,11 @@ docker run --name booking_cache `
     --network=myNetwork `
     -d redis:8.2.1
 
-docker run --name booking_back `
-    -p 7777:8000 `
-    --network=myNetwork `
-    booking_image
-
-
-docker run --name booking_celery_worker `
-    --network=myNetwork `
-    booking_image `
-    celery --app=src.tasks.celery_app:celery_instance worker -l INFO
-
-
-docker run --name booking_celery_beat `
-    --network=myNetwork `
-    booking_image `
-    celery --app=src.tasks.celery_app:celery_instance worker -l INFO -B
-
 
 docker build -t booking_image .
+
+
+docker run --name booking_nginx `
+    --volume /root/project/nginx.conf:/etc/nginx/nginx.conf `
+    --network=myNetwork `
+    -d -p 80:80 nginx
