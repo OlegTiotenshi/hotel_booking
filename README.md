@@ -1,2 +1,1 @@
-# hotel_booking
-FastApi
+Hotel Booking
