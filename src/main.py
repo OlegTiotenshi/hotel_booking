@@ -57,9 +57,11 @@ async def custom_swagger_ui_html():
 @app.get("/", response_class=HTMLResponse)
 def home():
     return """
-    <a href="http://127.0.0.1:8000/docs">Documentation</a><br>
-    <a href="http://127.0.0.1:8000/redoc">ReDoc</a><br>
-    <a href="http://127.0.0.1:8000/health">Health Check</a>
+    <a href="https://mokuzai-booking.ru/docs">Documentation</a><br>
+    <br>
+    <a href="https://mokuzai-booking.ru/redoc">ReDoc</a><br>
+    <br>
+    <a href="https://mokuzai-booking.ru/health">Health Check</a>
     """
 
 
