@@ -10,7 +10,7 @@ from src.exceptions import (
     IncorrectPasswordHTTPException,
 )
 from src.services.auth import AuthService
-from src.schemas.users import UserRequestAdd, UserAdd
+from src.schemas.users import UserRequestAdd
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
 
