@@ -1,0 +1,18 @@
+stages:
+  - build
+  - deploy
+
+build-job:
+  stage: build
+  before_script:
+    - cp ${ENV} .env
+    - cp ${TEST_ENV} .env-test
+  script:
+    - docker build -t booking-api-image .
+
+deploy-job:
+  stage: deploy
+  script:
+    - docker rm -f booking_back booking_celery_worker booking_celery_beat 2>/dev/null || true
+    - docker compose --file docker-compose-ci.yml up -d --force-recreate --build
+    - docker exec booking_nginx nginx -s reload
